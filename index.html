@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
 <title>WeddingWebsite — Lorem Ipsum Template</title>
 
 <!-- Tailwind -->
@@ -15,6 +16,10 @@
         fontFamily: {
           serif: ['"Playfair Display"', 'serif'],
           sans: ['Inter', 'sans-serif']
+        },
+        screens: {
+          'xs': '400px',
+          '3xl': '1800px'
         }
       }
     }
@@ -36,21 +41,29 @@
     --gold: #c9a96e;
     --dark: #0a0a0a;
     --light: #f5f0eb;
+    --nav-h: 64px;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
   body {
     font-family: 'Inter', sans-serif;
     background: var(--dark);
     color: var(--light);
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    min-height: 100svh;
   }
 
-  @media (min-width: 1024px) {
+  img { max-width: 100%; height: auto; display: block; }
+
+  /* Custom cursor hanya di perangkat dengan pointer presisi (desktop) */
+  @media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
     body { cursor: none; }
-    a, button, .portfolio-item, .blog-card { cursor: none; }
+    a, button, .portfolio-item, .blog-card, .filter-btn { cursor: none; }
   }
 
   /* ===== CUSTOM CURSOR ===== */
@@ -59,21 +72,25 @@
     border-radius: 50%; position: fixed; pointer-events: none;
     z-index: 9999; transition: transform 0.1s ease;
     mix-blend-mode: difference;
+    top: 0; left: 0;
   }
   .cursor-ring {
     width: 40px; height: 40px;
     border: 1px solid rgba(201, 169, 110, 0.5);
     border-radius: 50%; position: fixed; pointer-events: none;
     z-index: 9998;
-    transition: transform 0.15s ease, width 0.3s, height 0.3s, border-color 0.3s, background 0.3s;
+    transition: width 0.3s, height 0.3s, border-color 0.3s, background 0.3s;
+    top: 0; left: 0;
   }
   .cursor-ring.hover {
     width: 60px; height: 60px;
     border-color: var(--gold);
     background: rgba(201,169,110,0.1);
   }
-  @media (max-width: 1023px) {
-    .cursor-dot, .cursor-ring { display: none; }
+  /* Sembunyikan cursor custom di perangkat touch */
+  @media (hover: none), (pointer: coarse), (max-width: 1023px) {
+    .cursor-dot, .cursor-ring { display: none !important; }
+    body, a, button { cursor: auto !important; }
   }
 
   /* ===== PRELOADER ===== */
@@ -84,7 +101,7 @@
   }
   #preloader.hidden { opacity: 0; visibility: hidden; }
   .aperture {
-    width: 60px; height: 60px;
+    width: 50px; height: 50px;
     border: 3px solid var(--gold);
     border-radius: 50%; border-top-color: transparent;
     animation: spin 1s linear infinite;
@@ -96,33 +113,43 @@
     position: fixed; top: 0; left: 0; height: 3px;
     background: linear-gradient(90deg, var(--gold), #e5c78c);
     z-index: 9997; width: 0%; transition: width 0.1s linear;
+    will-change: width;
   }
 
   /* ===== NAVBAR ===== */
   .navbar {
     position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-    padding: 1.5rem 2rem; transition: all 0.4s ease;
+    padding: 1.25rem 1.25rem;
+    padding-left: max(1.25rem, env(safe-area-inset-left));
+    padding-right: max(1.25rem, env(safe-area-inset-right));
+    transition: background 0.4s ease, padding 0.4s ease, backdrop-filter 0.4s ease;
     display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem;
   }
   .navbar.scrolled {
     background: rgba(10,10,10,0.92);
+    -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
-    padding: 0.8rem 2rem;
+    padding: 0.75rem 1.25rem;
+    padding-left: max(1.25rem, env(safe-area-inset-left));
+    padding-right: max(1.25rem, env(safe-area-inset-right));
     border-bottom: 1px solid rgba(201,169,110,0.15);
   }
   .nav-logo {
     font-family: 'Playfair Display', serif;
-    font-size: 1.25rem; letter-spacing: 2px;
+    font-size: clamp(0.95rem, 2.6vw, 1.35rem);
+    letter-spacing: clamp(1px, 0.3vw, 3px);
     color: var(--light); text-decoration: none; font-weight: 700;
-    white-space: nowrap;
+    white-space: nowrap; flex-shrink: 0;
   }
   .nav-logo span { color: var(--gold); }
-  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links { display: flex; gap: 1.5rem; list-style: none; }
   .nav-links a {
     color: rgba(245,240,235,0.7);
-    text-decoration: none; font-size: 0.85rem;
+    text-decoration: none; font-size: 0.8rem;
     text-transform: uppercase; letter-spacing: 2px;
     position: relative; transition: color 0.3s;
+    white-space: nowrap;
   }
   .nav-links a::after {
     content: ''; position: absolute; bottom: -4px; left: 0;
@@ -131,27 +158,45 @@
   }
   .nav-links a:hover, .nav-links a.active { color: var(--gold); }
   .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
-  .menu-toggle { display: none; background: none; border: none; }
-  .menu-toggle span {
-    display: block; width: 25px; height: 2px;
-    background: var(--light); margin: 6px 0; transition: 0.3s;
+
+  .menu-toggle {
+    display: none; background: none; border: none;
+    padding: 8px; min-width: 44px; min-height: 44px;
+    align-items: center; justify-content: center; flex-direction: column;
   }
-  @media (max-width: 768px) {
+  .menu-toggle span {
+    display: block; width: 24px; height: 2px;
+    background: var(--light); margin: 3px 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .menu-toggle.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+  .menu-toggle.open span:nth-child(2) { opacity: 0; }
+  .menu-toggle.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+  /* Tablet ke bawah */
+  @media (max-width: 1023px) {
     .nav-links {
       position: fixed; top: 0; right: -100%;
-      width: 75%; height: 100vh;
+      width: min(320px, 80vw); height: 100vh;
+      height: 100svh;
       background: rgba(10,10,10,0.98);
-      flex-direction: column; justify-content: center;
-      align-items: center; gap: 3rem;
-      transition: right 0.4s ease;
+      -webkit-backdrop-filter: blur(20px);
       backdrop-filter: blur(20px);
+      flex-direction: column; justify-content: center;
+      align-items: center; gap: 2.5rem;
+      transition: right 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      padding: 2rem;
+      padding-top: max(2rem, env(safe-area-inset-top));
+      padding-bottom: max(2rem, env(safe-area-inset-bottom));
+      box-shadow: -10px 0 40px rgba(0,0,0,0.5);
     }
     .nav-links.open { right: 0; }
-    .menu-toggle { display: block; z-index: 1001; }
+    .nav-links a { font-size: 1rem; letter-spacing: 3px; }
+    .menu-toggle { display: flex; }
   }
 
   /* ===== PAGE ROUTING ===== */
-  .page { display: none; padding-top: 80px; min-height: 100vh; }
+  .page { display: none; padding-top: var(--nav-h); min-height: 100vh; min-height: 100svh; }
   .page.active { display: block; animation: pageFade 0.5s ease; }
   @keyframes pageFade {
     from { opacity: 0; transform: translateY(20px); }
@@ -160,7 +205,11 @@
 
   /* ===== HERO ===== */
   .hero {
-    height: 100vh; position: relative;
+    height: 100vh;
+    height: 100svh;
+    min-height: 560px;
+    max-height: 1200px;
+    position: relative;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
@@ -168,24 +217,61 @@
     position: absolute; inset: 0;
     background-size: cover; background-position: center;
     filter: brightness(0.4);
-    transition: transform 8s ease;
+    will-change: transform;
   }
-  .hero:hover .hero-bg { transform: scale(1.05); }
-  .hero-content { position: relative; z-index: 2; text-align: center; padding: 0 1.5rem; }
+  .hero-content {
+    position: relative; z-index: 2; text-align: center;
+    padding: 0 clamp(1rem, 4vw, 2rem);
+    max-width: 900px;
+  }
   .hero-title {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(2.5rem, 8vw, 7rem);
-    line-height: 1.1; letter-spacing: 2px;
+    font-size: clamp(2rem, 9vw, 6.5rem);
+    line-height: 1.05;
+    letter-spacing: clamp(1px, 0.2vw, 2px);
   }
   .hero-subtitle {
-    font-size: 0.85rem; text-transform: uppercase;
-    letter-spacing: 6px; color: var(--gold);
-    margin-bottom: 1rem;
+    font-size: clamp(0.65rem, 1.5vw, 0.9rem);
+    text-transform: uppercase;
+    letter-spacing: clamp(3px, 0.8vw, 6px);
+    color: var(--gold);
+    margin-bottom: clamp(0.75rem, 2vw, 1.25rem);
+  }
+  .hero-text {
+    font-size: clamp(0.8rem, 1.5vw, 0.95rem);
+    line-height: 1.7;
+    max-width: 480px;
+    margin: clamp(1rem, 3vw, 1.5rem) auto 0;
+    color: rgba(245,240,235,0.6);
+  }
+  .hero-cta {
+    display: inline-block;
+    margin-top: clamp(1.5rem, 4vw, 2rem);
+    padding: clamp(0.75rem, 1.5vw, 1rem) clamp(1.5rem, 3vw, 2rem);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-size: clamp(0.65rem, 1.2vw, 0.8rem);
+    text-transform: uppercase;
+    letter-spacing: clamp(2px, 0.4vw, 3px);
+    transition: background 0.3s, color 0.3s;
+    text-decoration: none;
+  }
+  .hero-cta:hover { background: var(--gold); color: var(--dark); }
+  .hero-scroll {
+    position: absolute;
+    bottom: clamp(1rem, 3vw, 2rem);
+    left: 50%; transform: translateX(-50%);
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: rgba(245,240,235,0.4);
   }
 
-  /* Small page hero */
+  /* Page hero (About, dll) */
   .page-hero {
-    height: 45vh; min-height: 320px; position: relative;
+    height: 45vh;
+    min-height: 280px;
+    max-height: 500px;
+    position: relative;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
@@ -203,11 +289,29 @@
   .reveal-right.visible, .reveal-scale.visible {
     opacity: 1; transform: translate(0) scale(1);
   }
+  @media (max-width: 640px) {
+    .reveal-left { transform: translateX(-30px); }
+    .reveal-right { transform: translateX(30px); }
+  }
+
+  /* ===== SECTION SPACING (Responsive) ===== */
+  .section-py {
+    padding-top: clamp(3rem, 8vw, 8rem);
+    padding-bottom: clamp(3rem, 8vw, 8rem);
+  }
+  .section-py-sm {
+    padding-top: clamp(2rem, 5vw, 4rem);
+    padding-bottom: clamp(2rem, 5vw, 4rem);
+  }
+  .section-px {
+    padding-left: clamp(1rem, 4vw, 2rem);
+    padding-right: clamp(1rem, 4vw, 2rem);
+  }
 
   /* ===== PORTFOLIO ===== */
   .portfolio-item {
     position: relative; overflow: hidden;
-    cursor: none;
+    cursor: pointer;
   }
   .portfolio-item img {
     width: 100%; height: 100%; object-fit: cover;
@@ -219,20 +323,33 @@
     background: linear-gradient(to top, rgba(10,10,10,0.95) 0%, transparent 65%);
     opacity: 0; transition: opacity 0.4s ease;
     display: flex; flex-direction: column; justify-content: flex-end;
-    padding: 1.5rem;
+    padding: clamp(0.75rem, 2vw, 1.5rem);
+    pointer-events: none;
   }
-  .portfolio-item:hover .portfolio-overlay { opacity: 1; }
+  .portfolio-item:hover .portfolio-overlay,
+  .portfolio-item:focus-within .portfolio-overlay { opacity: 1; }
+  /* Selalu tampilkan overlay di touch device */
+  @media (hover: none) {
+    .portfolio-overlay { opacity: 1; background: linear-gradient(to top, rgba(10,10,10,0.85) 0%, transparent 70%); }
+  }
   .exif-data {
-    display: flex; gap: 0.75rem; font-size: 0.65rem;
+    display: flex; flex-wrap: wrap; gap: clamp(0.3rem, 1vw, 0.75rem);
+    font-size: clamp(0.55rem, 1.2vw, 0.65rem);
     color: var(--gold); letter-spacing: 1px;
     text-transform: uppercase; margin-bottom: 0.4rem;
     transform: translateY(20px); transition: transform 0.4s ease 0.1s;
   }
-  .portfolio-item:hover .exif-data { transform: translateY(0); }
+  .portfolio-item:hover .exif-data,
+  .portfolio-item:focus-within .exif-data { transform: translateY(0); }
+  @media (hover: none) { .exif-data { transform: none; } }
+
   .filter-btn {
-    font-size: 0.75rem; text-transform: uppercase;
+    font-size: clamp(0.7rem, 1.3vw, 0.8rem);
+    text-transform: uppercase;
     letter-spacing: 2px; color: rgba(245,240,235,0.5);
     background: none; border: none; transition: color 0.3s;
+    padding: 0.5rem 0.25rem;
+    min-height: 44px;
   }
   .filter-btn:hover, .filter-btn.active { color: var(--gold); }
 
@@ -242,15 +359,29 @@
     display: flex;
     transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
   }
-  .testimonial-slide { min-width: 100%; padding: 2rem; text-align: center; }
+  .testimonial-slide {
+    min-width: 100%;
+    padding: clamp(1rem, 3vw, 2rem);
+    text-align: center;
+  }
+  .testimonial-text {
+    font-size: clamp(0.95rem, 2vw, 1.15rem);
+    line-height: 1.7;
+    color: rgba(245,240,235,0.7);
+    font-style: italic;
+  }
 
   /* ===== FORM ===== */
   .form-input {
     width: 100%; background: transparent;
     border: 1px solid rgba(201,169,110,0.25);
-    padding: 1rem; color: var(--light);
-    font-family: 'Inter', sans-serif; font-size: 0.9rem;
+    padding: clamp(0.75rem, 2vw, 1rem);
+    color: var(--light);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
     transition: border-color 0.3s, background 0.3s; outline: none;
+    border-radius: 0;
+    min-height: 44px;
   }
   .form-input:focus {
     border-color: var(--gold);
@@ -260,37 +391,68 @@
 
   /* ===== BACK TO TOP ===== */
   #back-to-top {
-    position: fixed; bottom: 2rem; right: 2rem;
-    width: 50px; height: 50px;
+    position: fixed;
+    bottom: max(1.25rem, env(safe-area-inset-bottom));
+    right: max(1rem, env(safe-area-inset-right));
+    width: clamp(40px, 8vw, 50px);
+    height: clamp(40px, 8vw, 50px);
     background: var(--gold); color: var(--dark);
     border: none; border-radius: 50%;
-    font-size: 1.2rem; opacity: 0; visibility: hidden;
+    font-size: clamp(0.9rem, 2vw, 1.15rem);
+    opacity: 0; visibility: hidden;
     transition: all 0.3s ease; z-index: 900;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(201,169,110,0.3);
   }
   #back-to-top.show { opacity: 1; visibility: visible; }
   #back-to-top:hover { transform: translateY(-5px); }
 
   /* ===== WHATSAPP ===== */
   #wa-float {
-    position: fixed; bottom: 2rem; left: 2rem;
-    width: 50px; height: 50px;
+    position: fixed;
+    bottom: max(1.25rem, env(safe-area-inset-bottom));
+    left: max(1rem, env(safe-area-inset-left));
+    width: clamp(40px, 8vw, 50px);
+    height: clamp(40px, 8vw, 50px);
     background: #25D366; color: white;
     border-radius: 50%; display: flex;
     align-items: center; justify-content: center;
-    font-size: 1.5rem; z-index: 900;
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    z-index: 900;
     transition: transform 0.3s; text-decoration: none;
+    box-shadow: 0 4px 20px rgba(37,211,102,0.35);
   }
-  #wa-float:hover { transform: scale(1.1); }
+  #wa-float:hover { transform: scale(1.08); }
 
-  /* ===== SWEETALERT CUSTOM ===== */
-  .swal2-popup { border-radius: 0 !important; }
-  .swal2-image { max-height: 75vh !important; border-radius: 4px; }
+  /* Layar sangat kecil - perkecil tombol float */
+  @media (max-width: 380px) {
+    #back-to-top { width: 38px; height: 38px; font-size: 0.85rem; bottom: 0.75rem; right: 0.75rem; }
+    #wa-float { width: 38px; height: 38px; font-size: 1rem; bottom: 0.75rem; left: 0.75rem; }
+  }
+
+  /* ===== SWEETALERT CUSTOM (Responsive) ===== */
+  .swal2-popup {
+    border-radius: 0 !important;
+    padding: clamp(1rem, 4vw, 2rem) !important;
+    max-width: min(94vw, 640px) !important;
+  }
+  .swal2-image {
+    max-height: min(65vh, 500px) !important;
+    object-fit: contain;
+    border-radius: 4px;
+    margin: 0 auto !important;
+  }
+  .swal2-title { font-size: clamp(1.1rem, 4vw, 1.6rem) !important; }
+  .swal2-html-container { font-size: clamp(0.85rem, 2vw, 0.95rem) !important; }
 
   /* ===== BLOG CARD ===== */
   .blog-card {
     transition: transform 0.4s ease;
+    cursor: pointer;
   }
-  .blog-card:hover { transform: translateY(-6px); }
+  @media (hover: hover) {
+    .blog-card:hover { transform: translateY(-6px); }
+  }
   .blog-card img { transition: transform 0.8s ease; }
   .blog-card:hover img { transform: scale(1.06); }
 
@@ -299,10 +461,33 @@
   .border-gold { border-color: var(--gold); }
   .bg-gold { background: var(--gold); }
 
-  /* Divider */
   .divider {
     width: 60px; height: 1px;
     background: var(--gold); margin: 1.5rem auto;
+  }
+
+  /* ===== UTIL: no-horizontal-scroll helper ===== */
+  .no-scroll-x { overflow-x: hidden; }
+
+  /* ===== REDUCED MOTION ===== */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* ===== LANDSCAPE HP ===== */
+  @media (max-height: 500px) and (orientation: landscape) {
+    .hero, .page-hero { height: auto; min-height: 100vh; padding: 5rem 1rem 3rem; }
+  }
+
+  /* ===== LAYAR SANGAT BESAR (3xl) ===== */
+  @media (min-width: 1800px) {
+    .hero-title { font-size: 7rem; }
+    .page { padding-top: 100px; }
   }
 </style>
 </head>
@@ -322,7 +507,7 @@
 <!-- ============ NAVBAR ============ -->
 <nav class="navbar">
   <a href="#home" class="nav-logo">Wedding<span>Website</span></a>
-  <ul class="nav-links">
+  <ul class="nav-links" id="nav-links">
     <li><a href="#home" data-page="home">Home</a></li>
     <li><a href="#about" data-page="about">About</a></li>
     <li><a href="#portfolio" data-page="portfolio">Portfolio</a></li>
@@ -330,7 +515,7 @@
     <li><a href="#contact" data-page="contact">Contact</a></li>
     <li><a href="#blog" data-page="blog">Blog</a></li>
   </ul>
-  <button class="menu-toggle" aria-label="menu">
+  <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
 </nav>
@@ -345,27 +530,27 @@
     <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1519741497674-611481863552?w=1920&q=80')"></div>
     <div class="hero-content">
       <p class="hero-subtitle animate__animated animate__fadeInDown">Lorem Ipsum Dolor Sit</p>
-      <h1 class="hero-title font-serif animate__animated animate__fadeInUp">
+      <h1 class="hero-title animate__animated animate__fadeInUp">
         Lorem Ipsum<br><span class="text-gold">Dolor</span> Sit Amet
       </h1>
-      <p class="mt-6 text-light/60 max-w-md mx-auto text-sm leading-relaxed animate__animated animate__fadeIn animate__delay-1s">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
+      <p class="hero-text animate__animated animate__fadeIn animate__delay-1s">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
       </p>
-      <a href="#portfolio" class="inline-block mt-8 px-8 py-3 border border-gold text-gold text-xs uppercase tracking-[3px] hover:bg-gold hover:text-dark transition-all duration-300 animate__animated animate__fadeInUp animate__delay-1s">
+      <a href="#portfolio" class="hero-cta animate__animated animate__fadeInUp animate__delay-1s">
         Lorem Ipsum
       </a>
     </div>
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-xs text-light/40 tracking-[3px] animate__animated animate__fadeIn animate__delay-2s">
+    <div class="hero-scroll animate__animated animate__fadeIn animate__delay-2s">
       SCROLL ↓
     </div>
   </section>
 
   <!-- ABOUT PREVIEW -->
-  <section class="py-24 md:py-32 px-6 max-w-6xl mx-auto">
-    <div class="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
+  <section class="section-py section-px max-w-6xl mx-auto">
+    <div class="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
       <div class="reveal-left">
-        <p class="text-gold text-xs uppercase tracking-[4px] mb-4">Since 20XX</p>
-        <h2 class="font-serif text-4xl md:text-5xl leading-tight mb-6">About <span class="text-gold">Dummy</span></h2>
+        <p class="text-gold text-xs uppercase tracking-[4px] mb-3">Since 20XX</p>
+        <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight mb-5">About <span class="text-gold">Dummy</span></h2>
         <div class="divider !mx-0"></div>
         <p class="text-light/60 leading-relaxed mb-4 text-sm">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -378,52 +563,52 @@
         </a>
       </div>
       <div class="reveal-right relative">
-        <img data-src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800&q=80" alt="About" class="w-full h-[420px] md:h-[520px] object-cover">
-        <div class="absolute -bottom-6 -left-6 w-32 h-32 border border-gold/30 -z-10"></div>
+        <img data-src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800&q=80" alt="About" class="w-full h-[320px] sm:h-[420px] md:h-[520px] object-cover">
+        <div class="hidden md:block absolute -bottom-6 -left-6 w-32 h-32 border border-gold/30 -z-10"></div>
       </div>
     </div>
   </section>
 
   <!-- FEATURED PORTFOLIO -->
-  <section class="py-16 px-6">
+  <section class="section-py-sm section-px">
     <div class="max-w-7xl mx-auto">
-      <div class="text-center mb-14 reveal">
+      <div class="text-center mb-10 md:mb-14 reveal">
         <p class="text-gold text-xs uppercase tracking-[4px] mb-3">Lorem Ipsum</p>
-        <h2 class="font-serif text-4xl md:text-5xl">Featured <span class="text-gold">Dolor</span></h2>
+        <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl">Featured <span class="text-gold">Dolor</span></h2>
         <div class="divider"></div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <div class="portfolio-item reveal-scale h-64 md:h-80" data-title="Lorem Ipsum Dolor" data-exif="ƒ/1.8 · 1/200s · ISO 800 · 35mm" data-category="cat1">
+        <div class="portfolio-item reveal-scale h-48 sm:h-64 md:h-80" data-title="Lorem Ipsum Dolor" data-exif="ƒ/1.8 · 1/200s · ISO 800 · 35mm" data-category="cat1">
           <img data-src="https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80" alt="Portfolio">
           <div class="portfolio-overlay">
             <div class="exif-data"><span>ƒ/1.8</span><span>1/200s</span><span>ISO 800</span></div>
-            <p class="text-gold text-xs uppercase tracking-[2px]">Lorem Ipsum Dolor</p>
+            <p class="text-gold text-[0.65rem] sm:text-xs uppercase tracking-[2px]">Lorem Ipsum Dolor</p>
           </div>
         </div>
-        <div class="portfolio-item reveal-scale h-64 md:h-80 md:mt-12" data-title="Sit Amet Consectetur" data-exif="ƒ/2.0 · 1/500s · ISO 400 · 50mm" data-category="cat2">
+        <div class="portfolio-item reveal-scale h-48 sm:h-64 md:h-80 md:mt-12" data-title="Sit Amet Consectetur" data-exif="ƒ/2.0 · 1/500s · ISO 400 · 50mm" data-category="cat2">
           <img data-src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600&q=80" alt="Portfolio">
           <div class="portfolio-overlay">
             <div class="exif-data"><span>ƒ/2.0</span><span>1/500s</span><span>ISO 400</span></div>
-            <p class="text-gold text-xs uppercase tracking-[2px]">Sit Amet Consectetur</p>
+            <p class="text-gold text-[0.65rem] sm:text-xs uppercase tracking-[2px]">Sit Amet Consectetur</p>
           </div>
         </div>
-        <div class="portfolio-item reveal-scale h-64 md:h-80" data-title="Adipiscing Elit Sed" data-exif="ƒ/2.8 · 1/160s · ISO 1600 · 85mm" data-category="cat1">
+        <div class="portfolio-item reveal-scale h-48 sm:h-64 md:h-80" data-title="Adipiscing Elit Sed" data-exif="ƒ/2.8 · 1/160s · ISO 1600 · 85mm" data-category="cat1">
           <img data-src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&q=80" alt="Portfolio">
           <div class="portfolio-overlay">
             <div class="exif-data"><span>ƒ/2.8</span><span>1/160s</span><span>ISO 1600</span></div>
-            <p class="text-gold text-xs uppercase tracking-[2px]">Adipiscing Elit Sed</p>
+            <p class="text-gold text-[0.65rem] sm:text-xs uppercase tracking-[2px]">Adipiscing Elit Sed</p>
           </div>
         </div>
-        <div class="portfolio-item reveal-scale h-64 md:h-80 md:mt-12" data-title="Eiusmod Tempor" data-exif="ƒ/1.4 · 1/320s · ISO 640 · 24mm" data-category="cat2">
+        <div class="portfolio-item reveal-scale h-48 sm:h-64 md:h-80 md:mt-12" data-title="Eiusmod Tempor" data-exif="ƒ/1.4 · 1/320s · ISO 640 · 24mm" data-category="cat2">
           <img data-src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=600&q=80" alt="Portfolio">
           <div class="portfolio-overlay">
             <div class="exif-data"><span>ƒ/1.4</span><span>1/320s</span><span>ISO 640</span></div>
-            <p class="text-gold text-xs uppercase tracking-[2px]">Eiusmod Tempor</p>
+            <p class="text-gold text-[0.65rem] sm:text-xs uppercase tracking-[2px]">Eiusmod Tempor</p>
           </div>
         </div>
       </div>
-      <div class="text-center mt-12 reveal">
-        <a href="#portfolio" class="inline-block px-8 py-3 border border-gold/50 text-gold text-xs uppercase tracking-[3px] hover:bg-gold hover:text-dark transition-all duration-300">
+      <div class="text-center mt-10 md:mt-12 reveal">
+        <a href="#portfolio" class="inline-block px-6 sm:px-8 py-3 border border-gold/50 text-gold text-xs uppercase tracking-[3px] hover:bg-gold hover:text-dark transition-all duration-300">
           Lorem Ipsum
         </a>
       </div>
@@ -431,24 +616,24 @@
   </section>
 
   <!-- TESTIMONIALS -->
-  <section class="py-24 md:py-32 px-6 bg-[#0f0f0f]">
+  <section class="section-py section-px bg-[#0f0f0f]">
     <div class="max-w-3xl mx-auto text-center">
       <p class="text-gold text-xs uppercase tracking-[4px] mb-3 reveal">Testimonials</p>
-      <h2 class="font-serif text-4xl md:text-5xl mb-4 reveal">Lorem <span class="text-gold">Ipsum</span></h2>
+      <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl mb-4 reveal">Lorem <span class="text-gold">Ipsum</span></h2>
       <div class="divider"></div>
-      <div class="testimonial-slider reveal mt-12">
+      <div class="testimonial-slider reveal mt-8 md:mt-12">
         <div class="testimonial-track">
           <div class="testimonial-slide">
-            <p class="text-light/70 text-lg leading-relaxed italic">"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."</p>
-            <p class="text-gold text-xs uppercase tracking-[2px] mt-6">— Lorem & Ipsum</p>
+            <p class="testimonial-text">"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."</p>
+            <p class="text-gold text-xs uppercase tracking-[2px] mt-5 md:mt-6">— Lorem & Ipsum</p>
           </div>
           <div class="testimonial-slide">
-            <p class="text-light/70 text-lg leading-relaxed italic">"Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."</p>
-            <p class="text-gold text-xs uppercase tracking-[2px] mt-6">— Dolor & Sit</p>
+            <p class="testimonial-text">"Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."</p>
+            <p class="text-gold text-xs uppercase tracking-[2px] mt-5 md:mt-6">— Dolor & Sit</p>
           </div>
           <div class="testimonial-slide">
-            <p class="text-light/70 text-lg leading-relaxed italic">"Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."</p>
-            <p class="text-gold text-xs uppercase tracking-[2px] mt-6">— Amet & Consectetur</p>
+            <p class="testimonial-text">"Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."</p>
+            <p class="text-gold text-xs uppercase tracking-[2px] mt-5 md:mt-6">— Amet & Consectetur</p>
           </div>
         </div>
       </div>
@@ -456,10 +641,12 @@
   </section>
 
   <!-- CTA -->
-  <section class="py-24 md:py-32 px-6 text-center reveal">
+  <section class="section-py section-px text-center reveal">
     <p class="text-gold text-xs uppercase tracking-[4px] mb-4">Lorem Ipsum Dolor</p>
-    <h2 class="font-serif text-4xl md:text-6xl mb-8">Lorem Ipsum <br><span class="text-gold">Dolor Sit Amet?</span></h2>
-    <a href="#contact" class="inline-block px-10 py-4 bg-gold text-dark text-xs uppercase tracking-[3px] hover:bg-light transition-all duration-300">
+    <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-6 md:mb-8 leading-tight">
+      Lorem Ipsum <br><span class="text-gold">Dolor Sit Amet?</span>
+    </h2>
+    <a href="#contact" class="inline-block px-8 md:px-10 py-3 md:py-4 bg-gold text-dark text-xs uppercase tracking-[3px] hover:bg-light transition-all duration-300">
       Lorem Ipsum
     </a>
   </section>
@@ -475,20 +662,20 @@
     <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=1920&q=80')"></div>
     <div class="hero-content">
       <p class="hero-subtitle">Lorem Ipsum</p>
-      <h1 class="hero-title font-serif">About <span class="text-gold">Us</span></h1>
+      <h1 class="hero-title">About <span class="text-gold">Us</span></h1>
     </div>
   </section>
 
-  <section class="py-24 md:py-32 px-6 max-w-4xl mx-auto">
+  <section class="section-py section-px max-w-4xl mx-auto">
     <div class="reveal">
-      <p class="text-gold text-xs uppercase tracking-[4px] mb-4">Since 20XX</p>
-      <h2 class="font-serif text-3xl md:text-4xl mb-8 leading-tight">
+      <p class="text-gold text-xs uppercase tracking-[4px] mb-3">Since 20XX</p>
+      <h2 class="font-serif text-2xl sm:text-3xl md:text-4xl mb-6 md:mb-8 leading-tight">
         Lorem Ipsum <span class="text-gold">Dolor Sit</span> Amet Consectetur
       </h2>
-      <p class="text-light/60 leading-relaxed mb-6 text-sm">
+      <p class="text-light/60 leading-relaxed mb-5 text-sm">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
       </p>
-      <p class="text-light/60 leading-relaxed mb-6 text-sm">
+      <p class="text-light/60 leading-relaxed mb-5 text-sm">
         Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
       </p>
       <p class="text-light/60 leading-relaxed text-sm">
@@ -498,19 +685,19 @@
   </section>
 
   <!-- TEAM -->
-  <section class="py-16 px-6 bg-[#0f0f0f]">
+  <section class="section-py-sm section-px bg-[#0f0f0f]">
     <div class="max-w-6xl mx-auto">
-      <h2 class="font-serif text-3xl md:text-4xl text-center mb-4 reveal">The <span class="text-gold">Team</span></h2>
+      <h2 class="font-serif text-2xl sm:text-3xl md:text-4xl text-center mb-4 reveal">The <span class="text-gold">Team</span></h2>
       <div class="divider"></div>
-      <div class="grid md:grid-cols-2 gap-12 mt-16">
+      <div class="grid sm:grid-cols-2 gap-10 md:gap-12 mt-12 md:mt-16">
         <div class="reveal-left text-center">
-          <img data-src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" class="w-48 h-48 rounded-full object-cover mx-auto mb-6" alt="John Doe">
-          <h3 class="font-serif text-xl">John Doe</h3>
+          <img data-src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full object-cover mx-auto mb-5 md:mb-6" alt="John Doe">
+          <h3 class="font-serif text-lg md:text-xl">John Doe</h3>
           <p class="text-gold text-xs uppercase tracking-[2px] mt-2">Lorem Ipsum Dolor</p>
         </div>
         <div class="reveal-right text-center">
-          <img data-src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" class="w-48 h-48 rounded-full object-cover mx-auto mb-6" alt="Jane Smith">
-          <h3 class="font-serif text-xl">Jane Smith</h3>
+          <img data-src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full object-cover mx-auto mb-5 md:mb-6" alt="Jane Smith">
+          <h3 class="font-serif text-lg md:text-xl">Jane Smith</h3>
           <p class="text-gold text-xs uppercase tracking-[2px] mt-2">Sit Amet Consectetur</p>
         </div>
       </div>
@@ -518,23 +705,23 @@
   </section>
 
   <!-- VALUES -->
-  <section class="py-24 px-6 max-w-6xl mx-auto">
-    <h2 class="font-serif text-3xl md:text-4xl text-center mb-4 reveal">Our <span class="text-gold">Values</span></h2>
+  <section class="section-py section-px max-w-6xl mx-auto">
+    <h2 class="font-serif text-2xl sm:text-3xl md:text-4xl text-center mb-4 reveal">Our <span class="text-gold">Values</span></h2>
     <div class="divider"></div>
-    <div class="grid md:grid-cols-3 gap-10 mt-16">
-      <div class="reveal-scale text-center border border-light/10 p-8 hover:border-gold/40 transition-all">
-        <p class="text-gold font-serif text-4xl mb-4">01</p>
-        <h3 class="font-serif text-xl mb-3">Lorem</h3>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 mt-12 md:mt-16">
+      <div class="reveal-scale text-center border border-light/10 p-6 md:p-8 hover:border-gold/40 transition-all">
+        <p class="text-gold font-serif text-3xl md:text-4xl mb-3 md:mb-4">01</p>
+        <h3 class="font-serif text-lg md:text-xl mb-3">Lorem</h3>
         <p class="text-light/50 text-sm leading-relaxed">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.</p>
       </div>
-      <div class="reveal-scale text-center border border-light/10 p-8 hover:border-gold/40 transition-all">
-        <p class="text-gold font-serif text-4xl mb-4">02</p>
-        <h3 class="font-serif text-xl mb-3">Ipsum</h3>
+      <div class="reveal-scale text-center border border-light/10 p-6 md:p-8 hover:border-gold/40 transition-all">
+        <p class="text-gold font-serif text-3xl md:text-4xl mb-3 md:mb-4">02</p>
+        <h3 class="font-serif text-lg md:text-xl mb-3">Ipsum</h3>
         <p class="text-light/50 text-sm leading-relaxed">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.</p>
       </div>
-      <div class="reveal-scale text-center border border-light/10 p-8 hover:border-gold/40 transition-all">
-        <p class="text-gold font-serif text-4xl mb-4">03</p>
-        <h3 class="font-serif text-xl mb-3">Dolor</h3>
+      <div class="reveal-scale text-center border border-light/10 p-6 md:p-8 hover:border-gold/40 transition-all">
+        <p class="text-gold font-serif text-3xl md:text-4xl mb-3 md:mb-4">03</p>
+        <h3 class="font-serif text-lg md:text-xl mb-3">Dolor</h3>
         <p class="text-light/50 text-sm leading-relaxed">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</p>
       </div>
     </div>
@@ -547,16 +734,16 @@
 <!-- =================================================== -->
 <main id="page-portfolio" class="page">
 
-  <section class="pt-32 md:pt-40 pb-16 px-6">
+  <section class="pt-24 sm:pt-28 md:pt-40 pb-12 md:pb-16 section-px">
     <div class="max-w-7xl mx-auto">
-      <div class="text-center mb-12 reveal">
+      <div class="text-center mb-10 md:mb-12 reveal">
         <p class="text-gold text-xs uppercase tracking-[4px] mb-3">Lorem Ipsum</p>
-        <h1 class="font-serif text-5xl md:text-7xl">Portfolio</h1>
+        <h1 class="font-serif text-4xl sm:text-5xl md:text-7xl">Portfolio</h1>
         <div class="divider"></div>
       </div>
 
       <!-- Filter -->
-      <div class="flex flex-wrap justify-center gap-6 mb-12 reveal">
+      <div class="flex flex-wrap justify-center gap-3 sm:gap-6 mb-10 md:mb-12 reveal">
         <button data-filter="all" class="filter-btn active">All</button>
         <button data-filter="cat1" class="filter-btn">Lorem</button>
         <button data-filter="cat2" class="filter-btn">Ipsum</button>
@@ -565,67 +752,67 @@
 
       <!-- Grid -->
       <div id="portfolio-grid" class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-        <div class="portfolio-item reveal-scale h-72 md:h-96" data-title="Lorem Ipsum Dolor" data-exif="ƒ/1.8 · 1/200s · ISO 800 · 35mm" data-category="cat1">
+        <div class="portfolio-item reveal-scale h-56 sm:h-72 md:h-96" data-title="Lorem Ipsum Dolor" data-exif="ƒ/1.8 · 1/200s · ISO 800 · 35mm" data-category="cat1">
           <img data-src="https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80" alt="Portfolio">
           <div class="portfolio-overlay">
             <div class="exif-data"><span>ƒ/1.8</span><span>1/200s</span><span>ISO 800</span><span>35mm</span></div>
-            <p class="text-gold text-xs uppercase tracking-[2px]">Lorem Ipsum Dolor</p>
+            <p class="text-gold text-[0.65rem] sm:text-xs uppercase tracking-[2px]">Lorem Ipsum Dolor</p>
           </div>
         </div>
-        <div class="portfolio-item reveal-scale h-72 md:h-96" data-title="Sit Amet Consectetur" data-exif="ƒ/2.0 · 1/500s · ISO 400 · 50mm" data-category="cat2">
+        <div class="portfolio-item reveal-scale h-56 sm:h-72 md:h-96" data-title="Sit Amet Consectetur" data-exif="ƒ/2.0 · 1/500s · ISO 400 · 50mm" data-category="cat2">
           <img data-src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800&q=80" alt="Portfolio">
           <div class="portfolio-overlay">
             <div class="exif-data"><span>ƒ/2.0</span><span>1/500s</span><span>ISO 400</span><span>50mm</span></div>
-            <p class="text-gold text-xs uppercase tracking-[2px]">Sit Amet Consectetur</p>
+            <p class="text-gold text-[0.65rem] sm:text-xs uppercase tracking-[2px]">Sit Amet Consectetur</p>
           </div>
         </div>
-        <div class="portfolio-item reveal-scale h-72 md:h-96" data-title="Adipiscing Elit Sed" data-exif="ƒ/2.8 · 1/160s · ISO 1600 · 85mm" data-category="cat1">
+        <div class="portfolio-item reveal-scale h-56 sm:h-72 md:h-96" data-title="Adipiscing Elit Sed" data-exif="ƒ/2.8 · 1/160s · ISO 1600 · 85mm" data-category="cat1">
           <img data-src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&q=80" alt="Portfolio">
           <div class="portfolio-overlay">
             <div class="exif-data"><span>ƒ/2.8</span><span>1/160s</span><span>ISO 1600</span><span>85mm</span></div>
-            <p class="text-gold text-xs uppercase tracking-[2px]">Adipiscing Elit Sed</p>
+            <p class="text-gold text-[0.65rem] sm:text-xs uppercase tracking-[2px]">Adipiscing Elit Sed</p>
           </div>
         </div>
-        <div class="portfolio-item reveal-scale h-72 md:h-96" data-title="Eiusmod Tempor" data-exif="ƒ/1.4 · 1/320s · ISO 640 · 24mm" data-category="cat2">
+        <div class="portfolio-item reveal-scale h-56 sm:h-72 md:h-96" data-title="Eiusmod Tempor" data-exif="ƒ/1.4 · 1/320s · ISO 640 · 24mm" data-category="cat2">
           <img data-src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=800&q=80" alt="Portfolio">
           <div class="portfolio-overlay">
             <div class="exif-data"><span>ƒ/1.4</span><span>1/320s</span><span>ISO 640</span><span>24mm</span></div>
-            <p class="text-gold text-xs uppercase tracking-[2px]">Eiusmod Tempor</p>
+            <p class="text-gold text-[0.65rem] sm:text-xs uppercase tracking-[2px]">Eiusmod Tempor</p>
           </div>
         </div>
-        <div class="portfolio-item reveal-scale h-72 md:h-96" data-title="Incididunt Ut Labore" data-exif="ƒ/2.0 · 1/250s · ISO 1250 · 50mm" data-category="cat3">
+        <div class="portfolio-item reveal-scale h-56 sm:h-72 md:h-96" data-title="Incididunt Ut Labore" data-exif="ƒ/2.0 · 1/250s · ISO 1250 · 50mm" data-category="cat3">
           <img data-src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&q=80" alt="Portfolio">
           <div class="portfolio-overlay">
             <div class="exif-data"><span>ƒ/2.0</span><span>1/250s</span><span>ISO 1250</span><span>50mm</span></div>
-            <p class="text-gold text-xs uppercase tracking-[2px]">Incididunt Ut Labore</p>
+            <p class="text-gold text-[0.65rem] sm:text-xs uppercase tracking-[2px]">Incididunt Ut Labore</p>
           </div>
         </div>
-        <div class="portfolio-item reveal-scale h-72 md:h-96" data-title="Dolore Magna Aliqua" data-exif="ƒ/1.8 · 1/400s · ISO 320 · 35mm" data-category="cat1">
+        <div class="portfolio-item reveal-scale h-56 sm:h-72 md:h-96" data-title="Dolore Magna Aliqua" data-exif="ƒ/1.8 · 1/400s · ISO 320 · 35mm" data-category="cat1">
           <img data-src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&q=80" alt="Portfolio">
           <div class="portfolio-overlay">
             <div class="exif-data"><span>ƒ/1.8</span><span>1/400s</span><span>ISO 320</span><span>35mm</span></div>
-            <p class="text-gold text-xs uppercase tracking-[2px]">Dolore Magna Aliqua</p>
+            <p class="text-gold text-[0.65rem] sm:text-xs uppercase tracking-[2px]">Dolore Magna Aliqua</p>
           </div>
         </div>
-        <div class="portfolio-item reveal-scale h-72 md:h-96" data-title="Veniam Quis Nostrud" data-exif="ƒ/2.2 · 1/640s · ISO 250 · 85mm" data-category="cat2">
+        <div class="portfolio-item reveal-scale h-56 sm:h-72 md:h-96" data-title="Veniam Quis Nostrud" data-exif="ƒ/2.2 · 1/640s · ISO 250 · 85mm" data-category="cat2">
           <img data-src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800&q=80" alt="Portfolio">
           <div class="portfolio-overlay">
             <div class="exif-data"><span>ƒ/2.2</span><span>1/640s</span><span>ISO 250</span><span>85mm</span></div>
-            <p class="text-gold text-xs uppercase tracking-[2px]">Veniam Quis Nostrud</p>
+            <p class="text-gold text-[0.65rem] sm:text-xs uppercase tracking-[2px]">Veniam Quis Nostrud</p>
           </div>
         </div>
-        <div class="portfolio-item reveal-scale h-72 md:h-96" data-title="Exercitation Ullamco" data-exif="ƒ/1.4 · 1/500s · ISO 400 · 100mm" data-category="cat3">
+        <div class="portfolio-item reveal-scale h-56 sm:h-72 md:h-96" data-title="Exercitation Ullamco" data-exif="ƒ/1.4 · 1/500s · ISO 400 · 100mm" data-category="cat3">
           <img data-src="https://images.unsplash.com/photo-1529636798458-92182e662485?w=800&q=80" alt="Portfolio">
           <div class="portfolio-overlay">
             <div class="exif-data"><span>ƒ/1.4</span><span>1/500s</span><span>ISO 400</span><span>100mm</span></div>
-            <p class="text-gold text-xs uppercase tracking-[2px]">Exercitation Ullamco</p>
+            <p class="text-gold text-[0.65rem] sm:text-xs uppercase tracking-[2px]">Exercitation Ullamco</p>
           </div>
         </div>
-        <div class="portfolio-item reveal-scale h-72 md:h-96" data-title="Laboris Nisi Aliquip" data-exif="ƒ/1.8 · 1/320s · ISO 800 · 50mm" data-category="cat1">
+        <div class="portfolio-item reveal-scale h-56 sm:h-72 md:h-96" data-title="Laboris Nisi Aliquip" data-exif="ƒ/1.8 · 1/320s · ISO 800 · 50mm" data-category="cat1">
           <img data-src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800&q=80" alt="Portfolio">
           <div class="portfolio-overlay">
             <div class="exif-data"><span>ƒ/1.8</span><span>1/320s</span><span>ISO 800</span><span>50mm</span></div>
-            <p class="text-gold text-xs uppercase tracking-[2px]">Laboris Nisi Aliquip</p>
+            <p class="text-gold text-[0.65rem] sm:text-xs uppercase tracking-[2px]">Laboris Nisi Aliquip</p>
           </div>
         </div>
       </div>
@@ -639,22 +826,21 @@
 <!-- =================================================== -->
 <main id="page-services" class="page">
 
-  <section class="pt-32 md:pt-40 pb-24 px-6 max-w-6xl mx-auto">
-    <div class="text-center mb-16 reveal">
+  <section class="pt-24 sm:pt-28 md:pt-40 pb-16 md:pb-24 section-px max-w-6xl mx-auto">
+    <div class="text-center mb-12 md:mb-16 reveal">
       <p class="text-gold text-xs uppercase tracking-[4px] mb-3">Lorem Ipsum</p>
-      <h1 class="font-serif text-5xl md:text-7xl">Services</h1>
+      <h1 class="font-serif text-4xl sm:text-5xl md:text-7xl">Services</h1>
       <div class="divider"></div>
     </div>
 
-    <div class="grid md:grid-cols-2 gap-6 md:gap-8">
-      <!-- Service 1 -->
-      <div class="reveal-left border border-light/10 p-8 md:p-10 hover:border-gold/50 transition-all duration-500">
-        <p class="text-gold text-xs uppercase tracking-[3px] mb-4">Lorem</p>
-        <h3 class="font-serif text-2xl mb-4">Lorem Ipsum Dolor Sit</h3>
-        <p class="text-light/50 text-sm leading-relaxed mb-6">
+    <div class="grid sm:grid-cols-2 gap-5 md:gap-8">
+      <div class="reveal-left border border-light/10 p-6 sm:p-8 md:p-10 hover:border-gold/50 transition-all duration-500">
+        <p class="text-gold text-xs uppercase tracking-[3px] mb-3 md:mb-4">Lorem</p>
+        <h3 class="font-serif text-xl md:text-2xl mb-3 md:mb-4">Lorem Ipsum Dolor Sit</h3>
+        <p class="text-light/50 text-sm leading-relaxed mb-5 md:mb-6">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
         </p>
-        <ul class="text-light/60 text-sm space-y-2 mb-8">
+        <ul class="text-light/60 text-sm space-y-2 mb-6 md:mb-8">
           <li>✦ Lorem ipsum dolor sit amet</li>
           <li>✦ Consectetur adipiscing elit</li>
           <li>✦ Sed do eiusmod tempor</li>
@@ -663,14 +849,13 @@
         <a href="#contact" class="text-gold text-xs uppercase tracking-[3px] border-b border-gold pb-1 hover:opacity-70 transition">Lorem →</a>
       </div>
 
-      <!-- Service 2 -->
-      <div class="reveal-right border border-light/10 p-8 md:p-10 hover:border-gold/50 transition-all duration-500">
-        <p class="text-gold text-xs uppercase tracking-[3px] mb-4">Ipsum</p>
-        <h3 class="font-serif text-2xl mb-4">Sit Amet Consectetur</h3>
-        <p class="text-light/50 text-sm leading-relaxed mb-6">
+      <div class="reveal-right border border-light/10 p-6 sm:p-8 md:p-10 hover:border-gold/50 transition-all duration-500">
+        <p class="text-gold text-xs uppercase tracking-[3px] mb-3 md:mb-4">Ipsum</p>
+        <h3 class="font-serif text-xl md:text-2xl mb-3 md:mb-4">Sit Amet Consectetur</h3>
+        <p class="text-light/50 text-sm leading-relaxed mb-5 md:mb-6">
           Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
         </p>
-        <ul class="text-light/60 text-sm space-y-2 mb-8">
+        <ul class="text-light/60 text-sm space-y-2 mb-6 md:mb-8">
           <li>✦ Duis aute irure dolor</li>
           <li>✦ In reprehenderit voluptate</li>
           <li>✦ Velit esse cillum dolore</li>
@@ -679,14 +864,13 @@
         <a href="#contact" class="text-gold text-xs uppercase tracking-[3px] border-b border-gold pb-1 hover:opacity-70 transition">Lorem →</a>
       </div>
 
-      <!-- Service 3 -->
-      <div class="reveal-left border border-light/10 p-8 md:p-10 hover:border-gold/50 transition-all duration-500">
-        <p class="text-gold text-xs uppercase tracking-[3px] mb-4">Dolor</p>
-        <h3 class="font-serif text-2xl mb-4">Adipiscing Elit Sed Do</h3>
-        <p class="text-light/50 text-sm leading-relaxed mb-6">
+      <div class="reveal-left border border-light/10 p-6 sm:p-8 md:p-10 hover:border-gold/50 transition-all duration-500">
+        <p class="text-gold text-xs uppercase tracking-[3px] mb-3 md:mb-4">Dolor</p>
+        <h3 class="font-serif text-xl md:text-2xl mb-3 md:mb-4">Adipiscing Elit Sed Do</h3>
+        <p class="text-light/50 text-sm leading-relaxed mb-5 md:mb-6">
           Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
         </p>
-        <ul class="text-light/60 text-sm space-y-2 mb-8">
+        <ul class="text-light/60 text-sm space-y-2 mb-6 md:mb-8">
           <li>✦ Sed ut perspiciatis unde</li>
           <li>✦ Omnis iste natus error</li>
           <li>✦ Sit voluptatem accusantium</li>
@@ -695,14 +879,13 @@
         <a href="#contact" class="text-gold text-xs uppercase tracking-[3px] border-b border-gold pb-1 hover:opacity-70 transition">Lorem →</a>
       </div>
 
-      <!-- Service 4 -->
-      <div class="reveal-right border border-light/10 p-8 md:p-10 hover:border-gold/50 transition-all duration-500">
-        <p class="text-gold text-xs uppercase tracking-[3px] mb-4">Amet</p>
-        <h3 class="font-serif text-2xl mb-4">Tempor Incididunt Labore</h3>
-        <p class="text-light/50 text-sm leading-relaxed mb-6">
+      <div class="reveal-right border border-light/10 p-6 sm:p-8 md:p-10 hover:border-gold/50 transition-all duration-500">
+        <p class="text-gold text-xs uppercase tracking-[3px] mb-3 md:mb-4">Amet</p>
+        <h3 class="font-serif text-xl md:text-2xl mb-3 md:mb-4">Tempor Incididunt Labore</h3>
+        <p class="text-light/50 text-sm leading-relaxed mb-5 md:mb-6">
           Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
         </p>
-        <ul class="text-light/60 text-sm space-y-2 mb-8">
+        <ul class="text-light/60 text-sm space-y-2 mb-6 md:mb-8">
           <li>✦ Nemo enim ipsam</li>
           <li>✦ Voluptatem quia voluptas</li>
           <li>✦ Sit aspernatur aut odit</li>
@@ -720,34 +903,34 @@
 <!-- =================================================== -->
 <main id="page-contact" class="page">
 
-  <section class="pt-32 md:pt-40 pb-20 px-6 max-w-6xl mx-auto">
-    <div class="text-center mb-16 reveal">
+  <section class="pt-24 sm:pt-28 md:pt-40 pb-12 md:pb-20 section-px max-w-6xl mx-auto">
+    <div class="text-center mb-12 md:mb-16 reveal">
       <p class="text-gold text-xs uppercase tracking-[4px] mb-3">Lorem Ipsum</p>
-      <h1 class="font-serif text-5xl md:text-7xl">Contact</h1>
+      <h1 class="font-serif text-4xl sm:text-5xl md:text-7xl">Contact</h1>
       <div class="divider"></div>
     </div>
 
-    <div class="grid md:grid-cols-2 gap-12 md:gap-16">
+    <div class="grid md:grid-cols-2 gap-10 md:gap-16">
       <div class="reveal-left">
-        <h3 class="font-serif text-2xl mb-6">Lorem Ipsum Dolor Sit Amet</h3>
-        <p class="text-light/50 text-sm leading-relaxed mb-8">
+        <h3 class="font-serif text-xl md:text-2xl mb-4 md:mb-6">Lorem Ipsum Dolor Sit Amet</h3>
+        <p class="text-light/50 text-sm leading-relaxed mb-6 md:mb-8">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
         </p>
 
-        <div class="space-y-4 text-sm text-light/60">
+        <div class="space-y-3 md:space-y-4 text-sm text-light/60">
           <p><span class="text-gold uppercase tracking-[2px] text-xs">Email:</span> &nbsp;hello@example.com</p>
           <p><span class="text-gold uppercase tracking-[2px] text-xs">Phone:</span> &nbsp;+1 (234) 567-8900</p>
           <p><span class="text-gold uppercase tracking-[2px] text-xs">Address:</span> &nbsp;123 Lorem Street, Dummy City</p>
         </div>
 
-        <div class="flex gap-6 mt-10 text-light/40 text-xs uppercase tracking-[2px]">
+        <div class="flex flex-wrap gap-4 md:gap-6 mt-8 md:mt-10 text-light/40 text-xs uppercase tracking-[2px]">
           <a href="#" class="hover:text-gold transition">Instagram</a>
           <a href="#" class="hover:text-gold transition">Facebook</a>
           <a href="#" class="hover:text-gold transition">Pinterest</a>
         </div>
       </div>
 
-      <form id="contact-form" class="reveal-right space-y-5">
+      <form id="contact-form" class="reveal-right space-y-4 md:space-y-5">
         <div>
           <label class="text-xs uppercase tracking-[2px] text-light/50 block mb-2">Name</label>
           <input type="text" id="name" class="form-input" placeholder="Lorem Ipsum">
@@ -764,7 +947,7 @@
           <label class="text-xs uppercase tracking-[2px] text-light/50 block mb-2">Message</label>
           <textarea rows="4" id="message" class="form-input" placeholder="Lorem ipsum dolor sit amet..."></textarea>
         </div>
-        <button type="submit" class="w-full py-4 bg-gold text-dark text-xs uppercase tracking-[3px] hover:bg-light transition-all duration-300">
+        <button type="submit" class="w-full py-3.5 md:py-4 bg-gold text-dark text-xs uppercase tracking-[3px] hover:bg-light transition-all duration-300">
           Lorem Ipsum
         </button>
       </form>
@@ -772,11 +955,13 @@
   </section>
 
   <!-- Map -->
-  <section class="px-6 pb-20 max-w-6xl mx-auto reveal">
-    <iframe
-      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126748.56347862248!2d107.57311675!3d-6.9034443!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68e6398252477f%3A0x146a4b1e3e9e5b0!2sBandung%2C%20Bandung%20City%2C%20West%20Java!5e0!3m2!1sen!2sid!4v1234567890"
-      width="100%" height="400" style="border:0; filter: grayscale(1) invert(0.9);"
-      allowfullscreen="" loading="lazy"></iframe>
+  <section class="px-4 sm:px-6 pb-16 md:pb-20 max-w-6xl mx-auto reveal">
+    <div class="w-full h-[280px] sm:h-[340px] md:h-[400px] overflow-hidden">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126748.56347862248!2d107.57311675!3d-6.9034443!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68e6398252477f%3A0x146a4b1e3e9e5b0!2sBandung%2C%20Bandung%20City%2C%20West%20Java!5e0!3m2!1sen!2sid!4v1234567890"
+        width="100%" height="100%" style="border:0; filter: grayscale(1) invert(0.9);"
+        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
   </section>
 
 </main>
@@ -786,60 +971,60 @@
 <!-- =================================================== -->
 <main id="page-blog" class="page">
 
-  <section class="pt-32 md:pt-40 pb-20 px-6 max-w-6xl mx-auto">
-    <div class="text-center mb-16 reveal">
+  <section class="pt-24 sm:pt-28 md:pt-40 pb-16 md:pb-20 section-px max-w-6xl mx-auto">
+    <div class="text-center mb-12 md:mb-16 reveal">
       <p class="text-gold text-xs uppercase tracking-[4px] mb-3">Journal</p>
-      <h1 class="font-serif text-5xl md:text-7xl">Blog</h1>
+      <h1 class="font-serif text-4xl sm:text-5xl md:text-7xl">Blog</h1>
       <div class="divider"></div>
     </div>
 
-    <div class="grid md:grid-cols-3 gap-8 md:gap-10">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
       <article class="blog-card reveal-scale" data-title="Lorem Ipsum Dolor Sit Amet" data-content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.">
         <div class="overflow-hidden mb-4">
-          <img data-src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=600&q=80" class="w-full h-56 object-cover" alt="Blog">
+          <img data-src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=600&q=80" class="w-full h-48 sm:h-52 md:h-56 object-cover" alt="Blog">
         </div>
         <p class="text-gold text-xs uppercase tracking-[2px] mb-2">Lorem · Jan 15, 20XX</p>
-        <h3 class="font-serif text-lg hover:text-gold transition">Lorem Ipsum Dolor Sit Amet</h3>
+        <h3 class="font-serif text-base md:text-lg hover:text-gold transition">Lorem Ipsum Dolor Sit Amet</h3>
       </article>
 
       <article class="blog-card reveal-scale" data-title="Consectetur Adipiscing Elit" data-content="Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit.">
         <div class="overflow-hidden mb-4">
-          <img data-src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&q=80" class="w-full h-56 object-cover" alt="Blog">
+          <img data-src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&q=80" class="w-full h-48 sm:h-52 md:h-56 object-cover" alt="Blog">
         </div>
         <p class="text-gold text-xs uppercase tracking-[2px] mb-2">Ipsum · Feb 2, 20XX</p>
-        <h3 class="font-serif text-lg hover:text-gold transition">Consectetur Adipiscing Elit</h3>
+        <h3 class="font-serif text-base md:text-lg hover:text-gold transition">Consectetur Adipiscing Elit</h3>
       </article>
 
       <article class="blog-card reveal-scale" data-title="Sed Do Eiusmod Tempor" data-content="Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.">
         <div class="overflow-hidden mb-4">
-          <img data-src="https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80" class="w-full h-56 object-cover" alt="Blog">
+          <img data-src="https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80" class="w-full h-48 sm:h-52 md:h-56 object-cover" alt="Blog">
         </div>
         <p class="text-gold text-xs uppercase tracking-[2px] mb-2">Dolor · Mar 10, 20XX</p>
-        <h3 class="font-serif text-lg hover:text-gold transition">Sed Do Eiusmod Tempor</h3>
+        <h3 class="font-serif text-base md:text-lg hover:text-gold transition">Sed Do Eiusmod Tempor</h3>
       </article>
 
       <article class="blog-card reveal-scale" data-title="Incididunt Ut Labore" data-content="Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore.">
         <div class="overflow-hidden mb-4">
-          <img data-src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&q=80" class="w-full h-56 object-cover" alt="Blog">
+          <img data-src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&q=80" class="w-full h-48 sm:h-52 md:h-56 object-cover" alt="Blog">
         </div>
         <p class="text-gold text-xs uppercase tracking-[2px] mb-2">Sit · Apr 5, 20XX</p>
-        <h3 class="font-serif text-lg hover:text-gold transition">Incididunt Ut Labore</h3>
+        <h3 class="font-serif text-base md:text-lg hover:text-gold transition">Incididunt Ut Labore</h3>
       </article>
 
       <article class="blog-card reveal-scale" data-title="Dolore Magna Aliqua" data-content="Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem.">
         <div class="overflow-hidden mb-4">
-          <img data-src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600&q=80" class="w-full h-56 object-cover" alt="Blog">
+          <img data-src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600&q=80" class="w-full h-48 sm:h-52 md:h-56 object-cover" alt="Blog">
         </div>
         <p class="text-gold text-xs uppercase tracking-[2px] mb-2">Amet · May 20, 20XX</p>
-        <h3 class="font-serif text-lg hover:text-gold transition">Dolore Magna Aliqua</h3>
+        <h3 class="font-serif text-base md:text-lg hover:text-gold transition">Dolore Magna Aliqua</h3>
       </article>
 
       <article class="blog-card reveal-scale" data-title="Ut Enim Ad Minim Veniam" data-content="Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt.">
         <div class="overflow-hidden mb-4">
-          <img data-src="https://images.unsplash.com/photo-1529636798458-92182e662485?w=600&q=80" class="w-full h-56 object-cover" alt="Blog">
+          <img data-src="https://images.unsplash.com/photo-1529636798458-92182e662485?w=600&q=80" class="w-full h-48 sm:h-52 md:h-56 object-cover" alt="Blog">
         </div>
         <p class="text-gold text-xs uppercase tracking-[2px] mb-2">Lorem · Jun 12, 20XX</p>
-        <h3 class="font-serif text-lg hover:text-gold transition">Ut Enim Ad Minim Veniam</h3>
+        <h3 class="font-serif text-base md:text-lg hover:text-gold transition">Ut Enim Ad Minim Veniam</h3>
       </article>
     </div>
   </section>
@@ -847,11 +1032,11 @@
 </main>
 
 <!-- ============ FOOTER ============ -->
-<footer class="border-t border-light/10 py-12 px-6">
-  <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+<footer class="border-t border-light/10 py-10 md:py-12 section-px">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-5 md:gap-6 text-center md:text-left">
     <a href="#home" class="nav-logo">Wedding<span>Website</span></a>
-    <p class="text-light/40 text-xs">© 20XX WeddingWebsite. Lorem ipsum dolor sit amet.</p>
-    <div class="flex gap-6 text-light/40 text-xs uppercase tracking-[2px]">
+    <p class="text-light/40 text-xs order-3 md:order-2">© 20XX WeddingWebsite. Lorem ipsum dolor sit amet.</p>
+    <div class="flex gap-5 md:gap-6 text-light/40 text-xs uppercase tracking-[2px] order-2 md:order-3">
       <a href="#" class="hover:text-gold transition">Instagram</a>
       <a href="#" class="hover:text-gold transition">Facebook</a>
       <a href="#" class="hover:text-gold transition">Pinterest</a>
@@ -863,73 +1048,112 @@
 <button id="back-to-top" aria-label="Back to top">↑</button>
 
 <!-- ============ WHATSAPP ============ -->
-<a href="https://wa.me/1234567890" id="wa-float" target="_blank" aria-label="WhatsApp">✆</a>
+<a href="https://wa.me/1234567890" id="wa-float" target="_blank" rel="noopener" aria-label="WhatsApp">✆</a>
 
 <!-- =================================================== -->
 <!-- ================== JAVASCRIPT ===================== -->
 <!-- =================================================== -->
 <script>
+/* ============ DETEKSI TOUCH DEVICE ============ */
+const isTouchDevice = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
 /* ============ PRELOADER ============ */
 window.addEventListener('load', () => {
   setTimeout(() => {
     document.getElementById('preloader')?.classList.add('hidden');
-  }, 1000);
+  }, 800);
 });
 
-/* ============ CUSTOM CURSOR ============ */
+/* ============ CUSTOM CURSOR (desktop only) ============ */
 (function initCursor() {
+  if (isTouchDevice || window.innerWidth < 1024) return;
   const dot = document.querySelector('.cursor-dot');
   const ring = document.querySelector('.cursor-ring');
   if (!dot || !ring) return;
+
   let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+  let rafId = null;
+
   document.addEventListener('mousemove', e => {
     mouseX = e.clientX; mouseY = e.clientY;
-    dot.style.left = (mouseX - 4) + 'px';
-    dot.style.top  = (mouseY - 4) + 'px';
-  });
+    dot.style.transform = `translate3d(${mouseX - 4}px, ${mouseY - 4}px, 0)`;
+  }, { passive: true });
+
   const animateRing = () => {
     ringX += (mouseX - ringX) * 0.15;
     ringY += (mouseY - ringY) * 0.15;
-    ring.style.left = (ringX - 20) + 'px';
-    ring.style.top  = (ringY - 20) + 'px';
-    requestAnimationFrame(animateRing);
+    ring.style.transform = `translate3d(${ringX - 20}px, ${ringY - 20}px, 0)`;
+    rafId = requestAnimationFrame(animateRing);
   };
   animateRing();
 
+  // Cleanup saat resize ke mobile
+  window.addEventListener('resize', () => {
+    if (window.innerWidth < 1024 && rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+      dot.style.display = 'none';
+      ring.style.display = 'none';
+    }
+  });
+
   document.addEventListener('mouseover', e => {
-    if (e.target.closest('a, button, .portfolio-item, .blog-card')) {
+    if (e.target.closest('a, button, .portfolio-item, .blog-card, .filter-btn')) {
       ring.classList.add('hover');
     }
   });
   document.addEventListener('mouseout', e => {
-    if (e.target.closest('a, button, .portfolio-item, .blog-card')) {
+    if (e.target.closest('a, button, .portfolio-item, .blog-card, .filter-btn')) {
       ring.classList.remove('hover');
     }
   });
 })();
 
 /* ============ SCROLL PROGRESS ============ */
+let scrollTicking = false;
 window.addEventListener('scroll', () => {
-  const scrollTop = window.scrollY;
-  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-  const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-  const bar = document.getElementById('scroll-progress');
-  if (bar) bar.style.width = progress + '%';
-});
+  if (!scrollTicking) {
+    requestAnimationFrame(() => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      const bar = document.getElementById('scroll-progress');
+      if (bar) bar.style.width = progress + '%';
+      scrollTicking = false;
+    });
+    scrollTicking = true;
+  }
+}, { passive: true });
 
 /* ============ NAVBAR SCROLL ============ */
 const navbar = document.querySelector('.navbar');
+let navTicking = false;
 window.addEventListener('scroll', () => {
-  if (window.scrollY > 80) navbar.classList.add('scrolled');
-  else navbar.classList.remove('scrolled');
-});
+  if (!navTicking) {
+    requestAnimationFrame(() => {
+      if (window.scrollY > 60) navbar.classList.add('scrolled');
+      else navbar.classList.remove('scrolled');
+      navTicking = false;
+    });
+    navTicking = true;
+  }
+}, { passive: true });
 
 /* ============ MOBILE MENU ============ */
-const menuToggle = document.querySelector('.menu-toggle');
-const navLinksEl = document.querySelector('.nav-links');
+const menuToggle = document.getElementById('menu-toggle');
+const navLinksEl = document.getElementById('nav-links');
 menuToggle?.addEventListener('click', () => {
-  navLinksEl.classList.toggle('open');
+  const isOpen = navLinksEl.classList.toggle('open');
+  menuToggle.classList.toggle('open', isOpen);
+  menuToggle.setAttribute('aria-expanded', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
 });
+function closeMobileMenu() {
+  navLinksEl.classList.remove('open');
+  menuToggle.classList.remove('open');
+  menuToggle.setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+}
 
 /* ============ HASH ROUTER (SPA) ============ */
 const pages = ['home', 'about', 'portfolio', 'services', 'contact', 'blog'];
@@ -975,7 +1199,7 @@ function initReveals() {
         entry.target.classList.add('visible');
       }
     });
-  }, { threshold: 0.12 });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
   els.forEach(el => revealObserver.observe(el));
 }
 
@@ -994,8 +1218,7 @@ function initLazyImages(root = document) {
         lazyObserver.unobserve(img);
       }
     });
-  }, { rootMargin: '200px' });
-
+  }, { rootMargin: '300px' });
   root.querySelectorAll('img[data-src]').forEach(img => lazyObserver.observe(img));
 }
 
@@ -1022,8 +1245,7 @@ function initPortfolioItems() {
         width: 'auto',
         padding: '1rem',
         showClass: { popup: 'animate__animated animate__fadeInUp animate__faster' },
-        hideClass: { popup: 'animate__animated animate__fadeOutDown animate__faster' },
-        customClass: { image: 'rounded-sm' }
+        hideClass: { popup: 'animate__animated animate__fadeOutDown animate__faster' }
       });
     });
   });
@@ -1073,10 +1295,15 @@ function initTestimonials() {
   testimonialInterval = setInterval(next, 5000);
 
   const slider = track.parentElement;
+  // Touch pause
   slider.addEventListener('mouseenter', () => clearInterval(testimonialInterval));
   slider.addEventListener('mouseleave', () => {
     testimonialInterval = setInterval(next, 5000);
   });
+  slider.addEventListener('touchstart', () => clearInterval(testimonialInterval), { passive: true });
+  slider.addEventListener('touchend', () => {
+    testimonialInterval = setInterval(next, 5000);
+  }, { passive: true });
 }
 
 /* ============ BLOG CARDS ============ */
@@ -1136,23 +1363,37 @@ function initForm() {
 
 /* ============ BACK TO TOP ============ */
 const backToTop = document.getElementById('back-to-top');
+let btTicking = false;
 window.addEventListener('scroll', () => {
-  if (window.scrollY > 600) backToTop.classList.add('show');
-  else backToTop.classList.remove('show');
-});
+  if (!btTicking) {
+    requestAnimationFrame(() => {
+      if (window.scrollY > 600) backToTop.classList.add('show');
+      else backToTop.classList.remove('show');
+      btTicking = false;
+    });
+    btTicking = true;
+  }
+}, { passive: true });
 backToTop?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-/* ============ PARALLAX (hero backgrounds) ============ */
+/* ============ PARALLAX HERO ============ */
+let parallaxTicking = false;
 window.addEventListener('scroll', () => {
-  const parallaxEls = document.querySelectorAll('.page.active .hero-bg, .page.active .page-hero .hero-bg');
-  parallaxEls.forEach(el => {
-    const rect = el.parentElement.getBoundingClientRect();
-    const offset = rect.top * 0.3;
-    if (Math.abs(offset) < 800) {
-      el.style.transform = `translateY(${offset}px)`;
-    }
-  });
-});
+  if (!parallaxTicking) {
+    requestAnimationFrame(() => {
+      const parallaxEls = document.querySelectorAll('.page.active .hero-bg');
+      parallaxEls.forEach(el => {
+        const rect = el.parentElement.getBoundingClientRect();
+        const offset = rect.top * 0.3;
+        if (Math.abs(offset) < 800) {
+          el.style.transform = `translate3d(0, ${offset}px, 0)`;
+        }
+      });
+      parallaxTicking = false;
+    });
+    parallaxTicking = true;
+  }
+}, { passive: true });
 
 /* ============ INIT ON LOAD ============ */
 document.addEventListener('DOMContentLoaded', () => {
@@ -1166,10 +1407,32 @@ document.addEventListener('DOMContentLoaded', () => {
   initForm();
 });
 
-/* ============ CLOSE MOBILE MENU ON LINK CLICK ============ */
+/* ============ CLOSE MENU SAAT LINK DIKLIK ============ */
 document.querySelectorAll('.nav-links a').forEach(a => {
-  a.addEventListener('click', () => navLinksEl.classList.remove('open'));
+  a.addEventListener('click', closeMobileMenu);
 });
+
+/* ============ CLOSE MENU SAAT RESIZE KE DESKTOP ============ */
+window.addEventListener('resize', () => {
+  if (window.innerWidth >= 1024 && navLinksEl.classList.contains('open')) {
+    closeMobileMenu();
+  }
+});
+
+/* ============ CLOSE MENU SAAT TEKAN ESC ============ */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && navLinksEl.classList.contains('open')) {
+    closeMobileMenu();
+  }
+});
+
+/* ============ PREVENT DOUBLE-TAP ZOOM DI MOBILE ============ */
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive: false });
 </script>
 
 </body>
